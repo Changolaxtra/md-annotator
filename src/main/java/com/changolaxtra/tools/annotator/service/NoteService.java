@@ -1,0 +1,58 @@
+package com.changolaxtra.tools.annotator.service;
+
+import com.changolaxtra.tools.annotator.dto.NoteDto;
+import com.changolaxtra.tools.annotator.model.NoteDocument;
+import com.changolaxtra.tools.annotator.repository.NoteRepository;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Service;
+import java.util.Optional;
+import java.util.UUID;
+
+
+@Service
+public class NoteService {
+
+  private final NoteRepository noteRepository;
+
+  public NoteService(final NoteRepository noteRepository) {
+    this.noteRepository = noteRepository;
+  }
+
+  @Nullable
+  public UUID save(@NotNull final NoteDto noteDto) {
+    final NoteDocument document = new NoteDocument(UUID.randomUUID(),
+        noteDto.getDate(),
+        noteDto.getContent(),
+        noteDto.getTags());
+
+    final NoteDocument saved = noteRepository.save(document);
+
+    return Optional.of(saved)
+        .map(NoteDocument::getId)
+        .orElse(null);
+  }
+
+  @Nullable
+  public NoteDto getByDate(@NotNull final String date) {
+    return noteRepository.findByDate(date)
+        .map(this::mapToDto)
+        .orElse(null);
+  }
+
+  public UUID update(@NotNull final String date, @NotNull final NoteDto noteDto) {
+    return noteRepository.findByDate(date)
+        .map(oldNote -> updateDocument(oldNote, noteDto))
+        .map(NoteDocument::getId)
+        .orElse(null);
+  }
+
+  private NoteDocument updateDocument(final NoteDocument oldNote, final NoteDto noteDto) {
+    return new NoteDocument(oldNote.getId(), noteDto.getDate(), noteDto.getContent(), noteDto.getTags());
+  }
+
+  private NoteDto mapToDto(final NoteDocument document) {
+    return new NoteDto(document.getDate(), document.getContent(), document.getTags());
+  }
+
+}

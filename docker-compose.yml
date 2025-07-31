@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_annotator_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: annotator_db
+  spring-boot-app:
+    build: . # Build the Spring Boot application from the current directory
+    container_name: spring-boot-app
+    ports:
+      - "8088:8088" # Map your Spring Boot application's port
+    depends_on:
+      - mongodb # Ensure MongoDB starts before the Spring Boot app
+    environment:
+      SPRING_DATA_MONGODB_HOST: mongodb # Use the service name as the host
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: annotator_db
+      SPRING_DATA_MONGODB_USERNAME: admin
+      SPRING_DATA_MONGODB_PASSWORD: password
+volumes:
+  mongodb_annotator_data:
