@@ -5,19 +5,23 @@ import com.changolaxtra.tools.annotator.service.NoteService;
 import com.changolaxtra.tools.annotator.service.SystemUserService;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.markdown.Markdown;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.Lumo;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +37,6 @@ public class HomeView extends VerticalLayout {
   private String currentContent = StringUtils.EMPTY;
   private LocalDate selectedDate;
   private List<String> currentTags = new ArrayList<>();
-  private String username;
 
   public HomeView(final NoteService noteService, SystemUserService userService) {
     this.noteService = noteService;
@@ -52,25 +55,36 @@ public class HomeView extends VerticalLayout {
   }
 
   private void buildUi() {
-    username = userService.getUserName();
     getElement().setAttribute("theme", Lumo.DARK);
     setAlignItems(Alignment.CENTER);
     setWidthFull();
-    //Horizontal and avatar
-    add(new Html("<h1>Hey " + username + "! Here we have your daily notes</h1>"));
 
     final Markdown markdown = getMarkdown();
     final TextArea textArea = getEditor(markdown);
 
-    addDatePicker(textArea);
+    addHeader(textArea);
     addEditorLayout(textArea, markdown);
-    addSaveButton(textArea);
+  }
+
+  private void addHeader(final TextArea textArea) {
+    final String username = userService.getUserName();
+    final HorizontalLayout headLayout = getHorizontalLayout();
+    headLayout.setAlignItems(Alignment.CENTER);
+    headLayout.setJustifyContentMode(JustifyContentMode.CENTER);
+    final Avatar avatar = new Avatar(username);
+    avatar.setColorIndex(RandomUtils.secure().randomInt(1,7));
+
+    headLayout.add(avatar);
+    headLayout.add(new Html("<h1>Hey " + username + "! Here we have your daily notes</h1>"));
+    headLayout.addToEnd(getDatePicker(textArea));
+    add(headLayout);
   }
 
   private Markdown getMarkdown() {
     final Markdown markdown = new Markdown();
     markdown.setMinWidth(100, Unit.PERCENTAGE);
-    markdown.setMinHeight(600, Unit.PIXELS);
+    markdown.setMinHeight(100, Unit.PERCENTAGE);
+    markdown.setContent(currentContent);
     return markdown;
   }
 
@@ -78,7 +92,7 @@ public class HomeView extends VerticalLayout {
     final TextArea textArea = new TextArea();
     textArea.setValue(currentContent);
     textArea.setMinWidth(100, Unit.PERCENTAGE);
-    textArea.setMinHeight( 600, Unit.PIXELS);
+    textArea.setMinHeight( 100, Unit.PERCENTAGE);
 
     textArea.addValueChangeListener(event -> {
       currentContent = event.getValue();
@@ -88,7 +102,7 @@ public class HomeView extends VerticalLayout {
     return textArea;
   }
 
-  private void addDatePicker(final TextArea textArea) {
+  private DatePicker getDatePicker(final TextArea textArea) {
     final DatePicker datePicker = new DatePicker("Select the Note Date");
     final LocalDate initialDate = LocalDate.now();
     datePicker.setMax(initialDate);
@@ -104,17 +118,31 @@ public class HomeView extends VerticalLayout {
           });
     });
 
-    add(datePicker);
+    return datePicker;
   }
 
   private void addEditorLayout(final TextArea textArea, final Markdown markdown) {
+    // Editor
+    final MenuBar editorMenuBar = new MenuBar();
+    editorMenuBar.addItem(new Html("<h3>Editor</h3>"));
+
     final VerticalLayout editorLayout = getVerticalLayout();
-    editorLayout.add(new Html("<h3>Editor</h3>"));
+    editorLayout.add(editorMenuBar);
     editorLayout.add(textArea);
 
+    final Button saveButton = getSaveButton();
+    final Button refreshButton = getRefreshButton(textArea, markdown);
+
+    // Preview
+    final MenuBar previewMenuBar = new MenuBar();
+    previewMenuBar.addItem(new Html("<h3>Preview</h3>"));
+    previewMenuBar.addItem(saveButton);
+    previewMenuBar.addItem(refreshButton);
+
     final VerticalLayout previewLayout = getVerticalLayout();
-    previewLayout.add(new Html("<h3>Preview</h3>"));
+    previewLayout.add(previewMenuBar);
     previewLayout.add(markdown);
+
 
     final HorizontalLayout horizontalLayout = getHorizontalLayout();
     horizontalLayout.add(editorLayout);
@@ -122,11 +150,31 @@ public class HomeView extends VerticalLayout {
     add(horizontalLayout);
   }
 
+  private @NotNull Button getSaveButton() {
+    final Button saveButton = new Button("Save");
+    saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+    saveButton.addClickListener(event -> {
+      final String selectedStringDate = getSelectedStringDate(selectedDate);
+      noteService.saveOrUpdate(selectedStringDate, new NoteDto(selectedStringDate, currentContent, currentTags));
+    });
+    return saveButton;
+  }
+
+  private Button getRefreshButton(final TextArea textArea, final Markdown markdown) {
+    final Button refreshButton = new Button("Refresh", new Icon(VaadinIcon.REFRESH));
+    refreshButton.addClickListener(event -> {
+      markdown.setContent(textArea.getValue());
+    });
+    return refreshButton;
+  }
+
   private VerticalLayout getVerticalLayout() {
     final VerticalLayout verticalLayout = new VerticalLayout();
     verticalLayout.setWidthFull();
-    verticalLayout.setAlignItems(Alignment.CENTER);
-    verticalLayout.setJustifyContentMode(JustifyContentMode.CENTER);
+    verticalLayout.setHeightFull();
+    verticalLayout.setAlignItems(Alignment.START);
+    verticalLayout.setJustifyContentMode(JustifyContentMode.START);
     verticalLayout.setPadding(true);
 
     return verticalLayout;
@@ -135,34 +183,11 @@ public class HomeView extends VerticalLayout {
   private HorizontalLayout getHorizontalLayout() {
     final HorizontalLayout horizontalLayout = new HorizontalLayout();
     horizontalLayout.setWidthFull();
-    horizontalLayout.setAlignItems(Alignment.CENTER);
+    horizontalLayout.setAlignItems(Alignment.START);
+    horizontalLayout.setJustifyContentMode(JustifyContentMode.START);
     horizontalLayout.setPadding(true);
-    horizontalLayout.setJustifyContentMode(JustifyContentMode.CENTER);
 
     return horizontalLayout;
-  }
-
-  private void addSaveButton(final TextArea textArea) {
-    final Button button = new Button("Save");
-    button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-    final ProgressBar progressBar = new ProgressBar();
-    progressBar.setMaxWidth(80, Unit.PERCENTAGE);
-
-    button.addClickListener(event -> {
-      progressBar.addThemeVariants(ProgressBarVariant.LUMO_SUCCESS);
-      progressBar.setValue(0.1);
-      final String selectedStringDate = getSelectedStringDate(selectedDate);
-      progressBar.setValue(0.5);
-      noteService.update(selectedStringDate, new NoteDto(selectedStringDate, currentContent, currentTags));
-      progressBar.addThemeVariants(ProgressBarVariant.LUMO_SUCCESS);
-      progressBar.setValue(1);
-    });
-
-    final HorizontalLayout buttonHorizontalLayout = getHorizontalLayout();
-    buttonHorizontalLayout.add(button);
-
-    add(progressBar);
-    add(buttonHorizontalLayout);
   }
 
   private NoteDto getNote(final LocalDate selectedDate) {

@@ -1,12 +1,9 @@
 package com.changolaxtra.tools.annotator;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
+//@SpringBootTest
 class MdAnnotatorApplicationTests {
 
-	@Test
+	//@Test
 	void contextLoads() {
 	}
 

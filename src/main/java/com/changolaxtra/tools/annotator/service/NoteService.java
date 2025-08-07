@@ -46,13 +46,17 @@ public class NoteService {
         .orElse(null);
   }
 
-  public UUID update(@NotNull final String date, @NotNull final NoteDto noteDto) {
-    logger.info("Updating NoteDto :{}", date);
-    return noteRepository.findByDate(date)
-        .map(oldNote -> updateDocument(oldNote, noteDto))
-        .map(noteRepository::save)
-        .map(NoteDocument::getId)
-        .orElse(null);
+  public UUID saveOrUpdate(@NotNull final String date, @NotNull final NoteDto noteDto) {
+    if (getByDate(date) == null) {
+      return save(noteDto);
+    } else {
+      logger.info("Updating NoteDto :{}", date);
+      return noteRepository.findByDate(date)
+          .map(oldNote -> updateDocument(oldNote, noteDto))
+          .map(noteRepository::save)
+          .map(NoteDocument::getId)
+          .orElse(null);
+    }
   }
 
   private NoteDocument updateDocument(final NoteDocument oldNote, final NoteDto noteDto) {

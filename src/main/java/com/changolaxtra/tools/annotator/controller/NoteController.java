@@ -41,7 +41,7 @@ public class NoteController {
   @PutMapping("/note/{date}")
   public ResponseEntity<String> update(@PathVariable String date, @RequestBody final NoteDto request) {
     return Optional.ofNullable(request)
-        .map(dto -> noteService.update(date, dto))
+        .map(dto -> noteService.saveOrUpdate(date, dto))
         .map(uuid -> ResponseEntity.ok(uuid.toString()))
         .orElse(ResponseEntity.badRequest().body("Invalid Request"));
   }
