@@ -3,6 +3,7 @@ package com.changolaxtra.tools.annotator.view;
 import com.changolaxtra.tools.annotator.dto.NoteDto;
 import com.changolaxtra.tools.annotator.service.NoteService;
 import com.changolaxtra.tools.annotator.service.SystemUserService;
+import com.changolaxtra.tools.annotator.view.factory.LayoutFactory;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -68,7 +69,7 @@ public class HomeView extends VerticalLayout {
 
   private void addHeader(final TextArea textArea) {
     final String username = userService.getUserName();
-    final HorizontalLayout headLayout = getHorizontalLayout();
+    final HorizontalLayout headLayout = LayoutFactory.getHorizontalLayout();
     headLayout.setAlignItems(Alignment.CENTER);
     headLayout.setJustifyContentMode(JustifyContentMode.CENTER);
     final Avatar avatar = new Avatar(username);
@@ -126,7 +127,7 @@ public class HomeView extends VerticalLayout {
     final MenuBar editorMenuBar = new MenuBar();
     editorMenuBar.addItem(new Html("<h3>Editor</h3>"));
 
-    final VerticalLayout editorLayout = getVerticalLayout();
+    final VerticalLayout editorLayout = LayoutFactory.getVerticalLayout();
     editorLayout.add(editorMenuBar);
     editorLayout.add(textArea);
 
@@ -139,19 +140,19 @@ public class HomeView extends VerticalLayout {
     previewMenuBar.addItem(saveButton);
     previewMenuBar.addItem(refreshButton);
 
-    final VerticalLayout previewLayout = getVerticalLayout();
+    final VerticalLayout previewLayout = LayoutFactory.getVerticalLayout();
     previewLayout.add(previewMenuBar);
     previewLayout.add(markdown);
 
 
-    final HorizontalLayout horizontalLayout = getHorizontalLayout();
+    final HorizontalLayout horizontalLayout = LayoutFactory.getHorizontalLayout();
     horizontalLayout.add(editorLayout);
     horizontalLayout.add(previewLayout);
     add(horizontalLayout);
   }
 
   private @NotNull Button getSaveButton() {
-    final Button saveButton = new Button("Save");
+    final Button saveButton = new Button("Save", new Icon(VaadinIcon.STORAGE));
     saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
     saveButton.addClickListener(event -> {
@@ -168,28 +169,7 @@ public class HomeView extends VerticalLayout {
     });
     return refreshButton;
   }
-
-  private VerticalLayout getVerticalLayout() {
-    final VerticalLayout verticalLayout = new VerticalLayout();
-    verticalLayout.setWidthFull();
-    verticalLayout.setHeightFull();
-    verticalLayout.setAlignItems(Alignment.START);
-    verticalLayout.setJustifyContentMode(JustifyContentMode.START);
-    verticalLayout.setPadding(true);
-
-    return verticalLayout;
-  }
-
-  private HorizontalLayout getHorizontalLayout() {
-    final HorizontalLayout horizontalLayout = new HorizontalLayout();
-    horizontalLayout.setWidthFull();
-    horizontalLayout.setAlignItems(Alignment.START);
-    horizontalLayout.setJustifyContentMode(JustifyContentMode.START);
-    horizontalLayout.setPadding(true);
-
-    return horizontalLayout;
-  }
-
+  
   private NoteDto getNote(final LocalDate selectedDate) {
     return Optional.ofNullable(noteService)
         .map(service -> service.getByDate(getSelectedStringDate(selectedDate)))
