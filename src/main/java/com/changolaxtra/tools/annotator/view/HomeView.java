@@ -3,11 +3,11 @@ package com.changolaxtra.tools.annotator.view;
 import com.changolaxtra.tools.annotator.dto.NoteDto;
 import com.changolaxtra.tools.annotator.service.NoteService;
 import com.changolaxtra.tools.annotator.service.SystemUserService;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -56,7 +56,8 @@ public class HomeView extends VerticalLayout {
     getElement().setAttribute("theme", Lumo.DARK);
     setAlignItems(Alignment.CENTER);
     setWidthFull();
-    add("Hey " + username + "! here are your daily notes");
+    //Horizontal and avatar
+    add(new Html("<h1>Hey " + username + "! Here we have your daily notes</h1>"));
 
     final Markdown markdown = getMarkdown();
     final TextArea textArea = getEditor(markdown);
@@ -108,11 +109,11 @@ public class HomeView extends VerticalLayout {
 
   private void addEditorLayout(final TextArea textArea, final Markdown markdown) {
     final VerticalLayout editorLayout = getVerticalLayout();
-    editorLayout.add("Editor");
+    editorLayout.add(new Html("<h3>Editor</h3>"));
     editorLayout.add(textArea);
 
     final VerticalLayout previewLayout = getVerticalLayout();
-    previewLayout.add("Preview");
+    previewLayout.add(new Html("<h3>Preview</h3>"));
     previewLayout.add(markdown);
 
     final HorizontalLayout horizontalLayout = getHorizontalLayout();
