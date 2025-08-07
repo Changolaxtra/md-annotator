@@ -5,6 +5,8 @@ import com.changolaxtra.tools.annotator.model.NoteDocument;
 import com.changolaxtra.tools.annotator.repository.NoteRepository;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,6 +14,8 @@ import java.util.UUID;
 
 @Service
 public class NoteService {
+
+  private static final Logger logger = LoggerFactory.getLogger(NoteService.class);
 
   private final NoteRepository noteRepository;
 
@@ -21,6 +25,7 @@ public class NoteService {
 
   @Nullable
   public UUID save(@NotNull final NoteDto noteDto) {
+    logger.info("Saving NoteDto :{}", noteDto.getDate());
     final NoteDocument document = new NoteDocument(UUID.randomUUID(),
         noteDto.getDate(),
         noteDto.getContent(),
@@ -35,14 +40,17 @@ public class NoteService {
 
   @Nullable
   public NoteDto getByDate(@NotNull final String date) {
+    logger.info("Getting NoteDto :{}", date);
     return noteRepository.findByDate(date)
         .map(this::mapToDto)
         .orElse(null);
   }
 
   public UUID update(@NotNull final String date, @NotNull final NoteDto noteDto) {
+    logger.info("Updating NoteDto :{}", date);
     return noteRepository.findByDate(date)
         .map(oldNote -> updateDocument(oldNote, noteDto))
+        .map(noteRepository::save)
         .map(NoteDocument::getId)
         .orElse(null);
   }

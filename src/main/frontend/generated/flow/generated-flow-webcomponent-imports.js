@@ -1,7 +1,17 @@
 import { injectGlobalWebcomponentCss } from 'Frontend/generated/jar-resources/theme-util.js';
 
-import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
+import '@vaadin/date-picker/src/vaadin-date-picker.js';
+import 'Frontend/generated/jar-resources/datepickerConnector.js';
+import '@vaadin/text-area/src/vaadin-text-area.js';
+import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
+import '@vaadin/tooltip/src/vaadin-tooltip.js';
+import '@vaadin/progress-bar/src/vaadin-progress-bar.js';
+import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/button/src/vaadin-button.js';
+import '@vaadin/markdown/src/vaadin-markdown.js';
+import 'Frontend/generated/jar-resources/disableOnClickFunctions.js';
+import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/vaadin-lumo-styles/sizing.js';
 import '@vaadin/vaadin-lumo-styles/spacing.js';
 import '@vaadin/vaadin-lumo-styles/style.js';
